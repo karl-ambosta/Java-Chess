@@ -5,6 +5,7 @@ import java.util.Set;
 
 import pieces.*;
 import pieces.Piece.Colour;
+import pieces.Piece.Type;
 
 public class Board {
 	
@@ -21,32 +22,34 @@ public class Board {
 		board = new Piece[8][8];
 		
 		// Add White Pieces
-		addPiece(new King(this, new Player(), new Point(7,4), Colour.WHITE));
-		addPiece(new Queen(this, new Player(), new Point(7,3), Colour.WHITE));
-		addPiece(new Rook(this, new Player(), new Point(7,0), Colour.WHITE));
-		addPiece(new Rook(this, new Player(), new Point(7,7), Colour.WHITE));
-		addPiece(new Knight(this, new Player(), new Point(7,1), Colour.WHITE));
-		addPiece(new Knight(this, new Player(), new Point(7,6), Colour.WHITE));
-		addPiece(new Bishop(this, new Player(), new Point(7,2), Colour.WHITE));
-		addPiece(new Bishop(this, new Player(), new Point(7,5), Colour.WHITE));
 		
+		//addPiece(new King(this, new Player(), new Point(7,4), Colour.WHITE));
+		//addPiece(new Queen(this, new Player(), new Point(7,3), Colour.WHITE));
+		//addPiece(new Rook(this, new Player(), new Point(7,0), Colour.WHITE));
+		//addPiece(new Rook(this, new Player(), new Point(7,7), Colour.WHITE));
+		addPiece(new Knight(new Point(7,1), Colour.WHITE));
+		addPiece(new Knight(new Point(7,6), Colour.WHITE));
+		//addPiece(new Bishop(this, new Player(), new Point(7,2), Colour.WHITE));
+		//addPiece(new Bishop(this, new Player(), new Point(7,5), Colour.WHITE));
+		/*
 		for(int i = 0; i < 8; i++) {
 			addPiece(new Pawn(this, new Player(), new Point(6,i), Colour.WHITE));
 		}
-		
+		*/
 		// Add Black Pieces		
-		addPiece(new King(this, new Player(), new Point(0,4), Colour.BLACK));
-		addPiece(new Queen(this, new Player(), new Point(0,3), Colour.BLACK));
-		addPiece(new Rook(this, new Player(), new Point(0,0), Colour.BLACK));
-		addPiece(new Rook(this, new Player(), new Point(0,7), Colour.BLACK));
-		addPiece(new Knight(this, new Player(), new Point(0,1), Colour.BLACK));
-		addPiece(new Knight(this, new Player(), new Point(0,6), Colour.BLACK));
-		addPiece(new Bishop(this, new Player(), new Point(0,2), Colour.BLACK));
-		addPiece(new Bishop(this, new Player(), new Point(0,5), Colour.BLACK));
-		
+		//addPiece(new King(this, new Player(), new Point(0,4), Colour.BLACK));
+		//addPiece(new Queen(this, new Player(), new Point(0,3), Colour.BLACK));
+		//addPiece(new Rook(this, new Player(), new Point(0,0), Colour.BLACK));
+		//addPiece(new Rook(this, new Player(), new Point(0,7), Colour.BLACK));
+		addPiece(new Knight(new Point(0,1), Colour.BLACK));
+		addPiece(new Knight(new Point(0,6), Colour.BLACK));
+		//addPiece(new Bishop(this, new Player(), new Point(0,2), Colour.BLACK));
+		//addPiece(new Bishop(this, new Player(), new Point(0,5), Colour.BLACK));
+		/*
 		for(int i = 0; i < 8; i++) {
 			addPiece(new Pawn(this, new Player(), new Point(1,i), Colour.BLACK));
 		}
+		*/
 	}
 	
 	public Piece getPiece(int x, int y) {
@@ -55,14 +58,33 @@ public class Board {
 	
 	public void move(Point start, Point dest) {
 		Piece p = getPiece(start.x, start.y);
+		Set<Point> pieceOptions = p.getOptions();
 		
+		for(Point point : pieceOptions) {
+			if(!checkPoint(p.getColour(), point)) {
+				pieceOptions.remove(point);
+			}
+		}
 		
-		if(p.movePiece(dest)) {
-			this.board[dest.x][dest.y] = p;
+		if(pieceOptions.contains(dest)) {
+			p.movePiece(dest);
 			this.board[start.x][start.y] = null;
+			this.board[dest.x][dest.y] = p;
+			String s = Character.toString((char)(start.x+65)) + (start.y+1);
+			String d = Character.toString((char)(dest.x+65)) + (dest.y+1);
+			System.out.println("Moved " + p.getType() + ": " + s + " -> " + d);
 		} else {
 			System.out.println("Invalid Move for " + p.getType());
 		}
+	}
+	
+	public boolean checkPoint(Colour c, Point p) {
+		if(this.getPiece(p.x, p.y) != null &&
+				this.getPiece(p.x, p.y).colour == c) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 	public void addPiece(Piece p) {
@@ -76,7 +98,7 @@ public class Board {
 	
 	public void showPossibleMoves(int row, int col) {
 		Piece p = this.getPiece(row, col);
-		Set<Point> options = p.showOptions(this);
+		Set<Point> options = p.getOptions();
 		System.out.println("Showing moves for " + p.getType() + " : ");
 		if(options.isEmpty()) {
 			System.out.println("No Valid Moves for Pawn " + Character.toString((char)(row+65)) + (col+1));

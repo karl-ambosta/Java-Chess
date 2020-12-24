@@ -43,7 +43,7 @@ public class Game {
 		
 		if(s.equals("Restart")) {
 			chessBoard.initialize();
-		} else if(s.equals("Help")) {
+		} else if(s.equals("help")) {
 			showCommands();
 		} else if(s.matches("([A-H]{1})([0-7]{1})(\\s){1}(\\?)")) {
 			chessBoard.showPossibleMoves(gridToPoint(input[0]).x, gridToPoint(input[0]).y);

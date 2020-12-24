@@ -7,27 +7,24 @@ import game.*;
 
 public abstract class Piece {
 	
+	public enum Type {
+		BISHOP, PAWN, ROOK, QUEEN, KING, KNIGHT, 
+	}	
 	public enum Colour {WHITE, BLACK};
 	
-	public Board board;
-	public Player player;
-	public Point position;
-	public Colour colour;	
 	
-	public Piece(Board board, Player player, Point position, Colour colour) {
-		this.board = board;
-		this.player = player;
+	public Point position;
+	public final Colour colour;
+	public Type pieceType;
+	
+	public Piece(Point position, Colour colour) {
 		this.position = position;
 		this.colour = colour;
 	}
-	
-	public abstract boolean isValidPath(Point dest);
-	
-	public abstract Set<Point> showOptions(Board gameBoard);
-	
-	public abstract Point drawPath(Point start, Point dest);
-	
-	public abstract boolean movePiece(Point dest);
+
+	public abstract Set<Point> getOptions();
+
+	public abstract void movePiece(Point dest);
 	
 	public abstract Type getType();
 	

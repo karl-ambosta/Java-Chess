@@ -3,92 +3,51 @@ package pieces;
 import java.awt.Point;
 import java.util.HashSet;
 import java.util.Set;
-
 import game.Board;
-import game.Player;
-import game.Type;
+
 
 public class Knight extends Piece {
 	
-	Type type;
-
-	public Knight(Board board, Player player, Point position, Colour colour) {
-		super(board, player, position, colour);
-		type = Type.KNIGHT;
+	public Knight(Point position, Colour colour) {
+		super(position, colour);
+		this.pieceType = Type.KNIGHT;
 	}
 
 	@Override
-	public boolean isValidPath(Point dest) {
-
-		// if outside of grid square -> invalid move
-		if(dest.x < 0 || dest.x > 7 || dest.y < 0 || dest.y > 7) {
-			return false;
-		}
-		
-		// If destination square has a piece of the same colour -> invalid move
-		if(this.board.getPiece(dest.x, dest.y) != null &&
-				this.board.getPiece(dest.x, dest.y).getColour() == this.colour) {
-			return false;
-		}
-		
-		// Otherwise -> valid move
-		return true;
-	}
-
-	@Override
-	public Set<Point> showOptions(Board gameBoard) {
+	public Set<Point> getOptions() {
 		Set<Point> options = new HashSet<>();
 		Point p = this.position;
 		
-		if(isValidPath(new Point(p.x+2, p.y+1))) {
-			options.add(new Point(p.x+2, p.y+1));
+		options.add(new Point(p.x+2, p.y+1));
+		options.add(new Point(p.x+1, p.y+2));
+		options.add(new Point(p.x-1, p.y+2));
+		options.add(new Point(p.x-2, p.y+1));
+		options.add(new Point(p.x-2, p.y-1));
+		options.add(new Point(p.x-1, p.y-2));
+		options.add(new Point(p.x-2, p.y+1));
+		options.add(new Point(p.x+1, p.y+2));
+		
+		Set<Point> toRemove = new HashSet<>();
+		
+		for(Point p1 : options) {
+			if(p1.x < 0 || p1.x > 7 || p1.y < 0 || p1.y > 7) {
+				toRemove.add(p1);
+			}
 		}
-		if(isValidPath(new Point(p.x+1, p.y+2))) {
-			options.add(new Point(p.x+1, p.y+2));
-		}
-		if(isValidPath(new Point(p.x-1, p.y+2))) {
-			options.add(new Point(p.x-1, p.y+2));
-		}
-		if(isValidPath(new Point(p.x-2, p.y+1))) {
-			options.add(new Point(p.x-2, p.y+1));
-		}
-		if(isValidPath(new Point(p.x-2, p.y-1))) {
-			options.add(new Point(p.x-2, p.y-1));
-		}
-		if(isValidPath(new Point(p.x-1, p.y-2))) {
-			options.add(new Point(p.x-1, p.y-2));
-		}
-		if(isValidPath(new Point(p.x-2, p.y+1))) {
-			options.add(new Point(p.x-2, p.y+1));
-		}
-		if(isValidPath(new Point(p.x-1, p.y+2))) {
-			options.add(new Point(p.x+1, p.y+2));
-		}
+		
+		options.removeAll(toRemove);
 		
 		return options;
 	}
 
 	@Override
-	public Point drawPath(Point start, Point dest) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean movePiece(Point dest) {
-		Set<Point> options = showOptions(this.board);
-		
-		if(options.contains(dest)) {
-			setPosition(dest.x, dest.y);
-			return true;
-		}
-		
-		return false;		
+	public void movePiece(Point dest) {
+		this.position = dest;
 	}
 
 	@Override
 	public Type getType() {
-		return Type.KNIGHT;
+		return this.pieceType;
 	}
 
 	@Override
