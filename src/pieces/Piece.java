@@ -1,9 +1,11 @@
 package pieces;
 
 import java.awt.Point;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
-import game.*;
+import game.Board;
 
 public abstract class Piece {
 	
@@ -22,11 +24,27 @@ public abstract class Piece {
 		this.colour = colour;
 	}
 
-	public abstract Set<Point> getOptions();
+	public abstract List<Point> getOptions(Board chessBoard);
 
-	public abstract void movePiece(Point dest);
+	public void movePiece(Point dest) {
+		this.position = dest;
+	}
 	
 	public abstract Type getType();
+	
+	public List<Point> checkPoints(List<Point> options) {
+		List<Point> toRemove = new ArrayList<Point>();
+		
+		for(Point p : options) {
+			if(p.x < 0 || p.x > 7 || p.y < 0 || p.y > 7) {
+				toRemove.add(p);
+			}
+		}
+		
+		options.sort(Comparator.comparing(Point::getX));
+		return options;
+		
+	}
 	
 	public Colour getColour() {
 		return this.colour;

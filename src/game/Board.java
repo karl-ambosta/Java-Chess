@@ -1,11 +1,10 @@
 package game;
 
 import java.awt.Point;
-import java.util.Set;
+import java.util.List;
 
 import pieces.*;
 import pieces.Piece.Colour;
-import pieces.Piece.Type;
 
 public class Board {
 	
@@ -14,8 +13,8 @@ public class Board {
 	private int cols;
 	
 	public Board() {
-		this.rows = 8;
-		this.cols = 8;
+		this.setRows(8);
+		this.setCols(8);
 	}
 	
 	public void initialize() {
@@ -25,8 +24,8 @@ public class Board {
 		
 		//addPiece(new King(this, new Player(), new Point(7,4), Colour.WHITE));
 		//addPiece(new Queen(this, new Player(), new Point(7,3), Colour.WHITE));
-		//addPiece(new Rook(this, new Player(), new Point(7,0), Colour.WHITE));
-		//addPiece(new Rook(this, new Player(), new Point(7,7), Colour.WHITE));
+		addPiece(new Rook(new Point(7,0), Colour.WHITE));
+		addPiece(new Rook(new Point(7,7), Colour.WHITE));
 		addPiece(new Knight(new Point(7,1), Colour.WHITE));
 		addPiece(new Knight(new Point(7,6), Colour.WHITE));
 		//addPiece(new Bishop(this, new Player(), new Point(7,2), Colour.WHITE));
@@ -39,8 +38,8 @@ public class Board {
 		// Add Black Pieces		
 		//addPiece(new King(this, new Player(), new Point(0,4), Colour.BLACK));
 		//addPiece(new Queen(this, new Player(), new Point(0,3), Colour.BLACK));
-		//addPiece(new Rook(this, new Player(), new Point(0,0), Colour.BLACK));
-		//addPiece(new Rook(this, new Player(), new Point(0,7), Colour.BLACK));
+		addPiece(new Rook(new Point(0,0), Colour.BLACK));
+		addPiece(new Rook(new Point(0,7), Colour.BLACK));
 		addPiece(new Knight(new Point(0,1), Colour.BLACK));
 		addPiece(new Knight(new Point(0,6), Colour.BLACK));
 		//addPiece(new Bishop(this, new Player(), new Point(0,2), Colour.BLACK));
@@ -58,7 +57,7 @@ public class Board {
 	
 	public void move(Point start, Point dest) {
 		Piece p = getPiece(start.x, start.y);
-		Set<Point> pieceOptions = p.getOptions();
+		List<Point> pieceOptions = p.getOptions(this);
 		
 		for(Point point : pieceOptions) {
 			if(!checkPoint(p.getColour(), point)) {
@@ -98,7 +97,7 @@ public class Board {
 	
 	public void showPossibleMoves(int row, int col) {
 		Piece p = this.getPiece(row, col);
-		Set<Point> options = p.getOptions();
+		List<Point> options = p.getOptions(this);
 		System.out.println("Showing moves for " + p.getType() + " : ");
 		if(options.isEmpty()) {
 			System.out.println("No Valid Moves for Pawn " + Character.toString((char)(row+65)) + (col+1));
@@ -106,6 +105,22 @@ public class Board {
 		for(Point pos : options) {
 			System.out.println("[" + Character.toString((char)(pos.x+65)) + (pos.y+1) + "]");
 		}
+	}
+
+	public int getRows() {
+		return rows;
+	}
+
+	public void setRows(int rows) {
+		this.rows = rows;
+	}
+
+	public int getCols() {
+		return cols;
+	}
+
+	public void setCols(int cols) {
+		this.cols = cols;
 	}
 	
 	public String toString(){
@@ -130,5 +145,6 @@ public class Board {
 	    
 	    return chess;
 	}
+
 
 }

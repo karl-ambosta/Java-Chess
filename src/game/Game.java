@@ -3,13 +3,11 @@ package game;
 import java.awt.Point;
 import java.util.Scanner;
 
-import pieces.Piece;
-
 public class Game {
 	
 	Scanner userInput = new Scanner(System.in);
 	
-	private int currentPlayer;
+	//private int currentPlayer;
 	private Board chessBoard;
 	
 	

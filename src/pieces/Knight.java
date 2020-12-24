@@ -1,10 +1,9 @@
 package pieces;
 
 import java.awt.Point;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import game.Board;
-
 
 public class Knight extends Piece {
 	
@@ -14,8 +13,8 @@ public class Knight extends Piece {
 	}
 
 	@Override
-	public Set<Point> getOptions() {
-		Set<Point> options = new HashSet<>();
+	public List<Point> getOptions(Board chessBoard) {
+		List<Point> options = new ArrayList<Point>();
 		Point p = this.position;
 		
 		options.add(new Point(p.x+2, p.y+1));
@@ -27,22 +26,7 @@ public class Knight extends Piece {
 		options.add(new Point(p.x-2, p.y+1));
 		options.add(new Point(p.x+1, p.y+2));
 		
-		Set<Point> toRemove = new HashSet<>();
-		
-		for(Point p1 : options) {
-			if(p1.x < 0 || p1.x > 7 || p1.y < 0 || p1.y > 7) {
-				toRemove.add(p1);
-			}
-		}
-		
-		options.removeAll(toRemove);
-		
-		return options;
-	}
-
-	@Override
-	public void movePiece(Point dest) {
-		this.position = dest;
+		return checkPoints(options);
 	}
 
 	@Override
@@ -57,5 +41,4 @@ public class Knight extends Piece {
 		}
 		return "\u265E";
 	}
-
 }
