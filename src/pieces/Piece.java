@@ -41,6 +41,8 @@ public abstract class Piece {
 			}
 		}
 		
+		options.removeAll(toRemove);
+		
 		options.sort(Comparator.comparing(Point::getX));
 		return options;
 		

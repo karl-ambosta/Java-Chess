@@ -22,36 +22,39 @@ public class Board {
 		
 		// Add White Pieces
 		
-		//addPiece(new King(this, new Player(), new Point(7,4), Colour.WHITE));
-		//addPiece(new Queen(this, new Player(), new Point(7,3), Colour.WHITE));
+		addPiece(new King(new Point(7,4), Colour.WHITE));
+		addPiece(new Queen(new Point(7,3), Colour.WHITE));
 		addPiece(new Rook(new Point(7,0), Colour.WHITE));
 		addPiece(new Rook(new Point(7,7), Colour.WHITE));
 		addPiece(new Knight(new Point(7,1), Colour.WHITE));
 		addPiece(new Knight(new Point(7,6), Colour.WHITE));
-		//addPiece(new Bishop(this, new Player(), new Point(7,2), Colour.WHITE));
-		//addPiece(new Bishop(this, new Player(), new Point(7,5), Colour.WHITE));
-		/*
+		addPiece(new Bishop(new Point(7,2), Colour.WHITE));
+		addPiece(new Bishop(new Point(7,5), Colour.WHITE));
+		
 		for(int i = 0; i < 8; i++) {
-			addPiece(new Pawn(this, new Player(), new Point(6,i), Colour.WHITE));
+			addPiece(new Pawn(new Point(6,i), Colour.WHITE));
 		}
-		*/
+		
 		// Add Black Pieces		
-		//addPiece(new King(this, new Player(), new Point(0,4), Colour.BLACK));
-		//addPiece(new Queen(this, new Player(), new Point(0,3), Colour.BLACK));
+		addPiece(new King(new Point(0,4), Colour.BLACK));
+		addPiece(new Queen(new Point(0,3), Colour.BLACK));
 		addPiece(new Rook(new Point(0,0), Colour.BLACK));
 		addPiece(new Rook(new Point(0,7), Colour.BLACK));
 		addPiece(new Knight(new Point(0,1), Colour.BLACK));
 		addPiece(new Knight(new Point(0,6), Colour.BLACK));
-		//addPiece(new Bishop(this, new Player(), new Point(0,2), Colour.BLACK));
-		//addPiece(new Bishop(this, new Player(), new Point(0,5), Colour.BLACK));
-		/*
+		addPiece(new Bishop(new Point(0,2), Colour.BLACK));
+		addPiece(new Bishop(new Point(0,5), Colour.BLACK));
+		
 		for(int i = 0; i < 8; i++) {
-			addPiece(new Pawn(this, new Player(), new Point(1,i), Colour.BLACK));
+			addPiece(new Pawn(new Point(1,i), Colour.BLACK));
 		}
-		*/
+		
 	}
 	
 	public Piece getPiece(int x, int y) {
+		if(x < 0 || x > 7 || y < 0 || y > 7) {
+			return null;
+		}
 		return this.board[x][y];
 	}
 	
@@ -97,6 +100,10 @@ public class Board {
 	
 	public void showPossibleMoves(int row, int col) {
 		Piece p = this.getPiece(row, col);
+		if(p == null) {
+			System.out.println("Tile is empty!");
+			return;
+		}
 		List<Point> options = p.getOptions(this);
 		System.out.println("Showing moves for " + p.getType() + " : ");
 		if(options.isEmpty()) {

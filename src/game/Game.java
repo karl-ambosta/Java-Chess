@@ -44,7 +44,15 @@ public class Game {
 		} else if(s.equals("help")) {
 			showCommands();
 		} else if(s.matches("([A-H]{1})([0-7]{1})(\\s){1}(\\?)")) {
-			chessBoard.showPossibleMoves(gridToPoint(input[0]).x, gridToPoint(input[0]).y);
+			int x_coord = gridToPoint(input[0]).x;
+			int y_coord = gridToPoint(input[0]).y;
+			
+			if(x_coord >= 0 || x_coord < 8 || y_coord >= 0 || y_coord < 8) {
+				chessBoard.showPossibleMoves(gridToPoint(input[0]).x, gridToPoint(input[0]).y);
+			} else {
+				System.out.println("Invalid Tile!");
+			}
+			
 		} else if(isValidGrid(s)) {
 			chessBoard.move(gridToPoint(input[0]), gridToPoint(input[1]));
 			System.out.print(chessBoard.toString() + "\n");
