@@ -1,21 +1,47 @@
 package game;
 
 import java.awt.Point;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import pieces.*;
 import pieces.Piece.Colour;
+import pieces.Piece.Type;
 
-public class Board {
+public class Board implements Serializable, Cloneable {
 	
 	private Piece[][] board;
 	private int rows;
 	private int cols;
+	private Board previousState = null;
+    private Colour turn;
+    private List<Piece> pieces = new ArrayList<Piece>();
+    
+    private Piece inCheck = null;
+    private Piece lastMoved = null;
+    private Ai ai = null;
 	
 	public Board() {
 		this.setRows(8);
 		this.setCols(8);
 	}
+	
+	private Board(Colour turn, Board previousState, List<Piece> pieces,
+            Piece lastMoved, Piece inCheck, Ai ai) {
+        this.turn = turn;
+        if (inCheck != null) {
+            this.inCheck = inCheck.clone();
+        }
+        if (lastMoved != null)
+            this.lastMoved = lastMoved.clone();
+        this.ai = ai;
+        this.previousState = previousState;
+        for(Piece p : pieces) {
+            this.pieces.add(p.clone());
+        }
+    }
 	
 	public void initialize() {
 		board = new Piece[8][8];
@@ -89,13 +115,67 @@ public class Board {
 		return true;
 	}
 	
+	public boolean isValidGrid(Point p) {
+		if(p.x >= 0 && p.x < 8 && p.y >= 0 && p.y < 8) {
+			return true;
+		}
+		return false;
+	}
+	
+	public void movePiece(Move m) {
+		if(m.getCaptured() != null) {
+			this.removePiece(m.getPosition());
+		}
+		
+		m.getPiece().setPosition(m.getPosition()); 
+	}
+	
+	public boolean ifMovePutsKingInCheck(Move m, Colour c) {
+		Board boardCopy = checkMove(m);
+		
+		for(Piece p : boardCopy.getPieces(c)) {
+			System.out.println(p.getColour() + " " + p.getType());
+			if(p.getColour() == c) {
+				for(Move mv : p.getValidMoves(boardCopy, false))
+                    // if a move would result in the capture of a king
+                    if (mv.getCaptured() instanceof King) 
+                        return true;
+			}
+		}
+
+		
+		return false;
+		
+	}
+	
+	private Board checkMove(Move m) {
+		Board boardCopy = this.clone();
+		
+		if(m.getCaptured() != null) {
+			Point pc = m.getCaptured().getPosition();
+			Piece capture = boardCopy.getPiece(pc.x, pc.y);
+
+			Point pm = m.getCaptured().getPosition();
+            Piece moving = boardCopy.getPiece(pm.x, pm.y);
+
+            // performs the move on the copied board
+            boardCopy.movePiece(new Move(moving, m.getPosition(), capture));
+		}
+		return boardCopy;
+	}
+
+	public List<Piece> getPieces(Colour c) {
+		return pieces.stream().filter(p -> p.getColour() == c).collect(Collectors.toList());
+	}
+	
 	public void addPiece(Piece p) {
 		Point pos = p.getPosition();
 		this.board[pos.x][pos.y] = p;
 	}
 	
-	public void removePiece(int row, int col) {
-		this.board[row][col] = null;
+	public void removePiece(Point p) {
+		this.board[p.x][p.y] = null;
+		// pieces.remove(p);
 	}
 	
 	public void showPossibleMoves(int row, int col) {
@@ -151,6 +231,11 @@ public class Board {
 	      chess += "\t---------------------------------";
 	    
 	    return chess;
+	}
+	
+	@Override
+	public Board clone() {
+		return new Board(turn, previousState, pieces, lastMoved, inCheck, ai);
 	}
 
 

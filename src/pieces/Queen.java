@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 import game.Board;
+import game.Move;
 
 public class Queen extends Piece {
 
@@ -120,11 +121,37 @@ public class Queen extends Piece {
 		}
 		return checkPoints(options);
 	}
+	
+	@Override
+	public List<Move> getValidMoves(Board board, boolean checkKing) {
+		List<Move> options = new ArrayList<Move>();
+		Point p = this.position;
+
+		// add moves in lines up, down, left, right
+		addMovesInLine(board, options, -1, 0);
+		addMovesInLine(board, options, 1, 0);
+		addMovesInLine(board, options, 0, -1);
+		addMovesInLine(board, options, 0, 1);
+		
+		//add moves in lines diagonals
+		addMovesInLine(board, options, -1, -1);
+		addMovesInLine(board, options, -1, 1);
+		addMovesInLine(board, options, 1, 1);
+		addMovesInLine(board, options, 1, -1);
+		
+		return null;
+	}
 
 	@Override
 	public Type getType() {
 		return this.pieceType;
 	}
+	
+	@Override
+	public Piece clone() {
+        return new Queen(new Point(this.position.x, this.position.y),
+                this.colour);
+    }
 
 	@Override
 	public String toString() {
@@ -133,4 +160,6 @@ public class Queen extends Piece {
 		}
 		return "\u265B";
 	}
+
+	
 }

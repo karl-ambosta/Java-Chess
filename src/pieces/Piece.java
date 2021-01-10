@@ -1,13 +1,15 @@
 package pieces;
 
 import java.awt.Point;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 import game.Board;
+import game.Move;
 
-public abstract class Piece {
+public abstract class Piece implements Serializable, Cloneable {
 	
 	public enum Type {
 		BISHOP, PAWN, ROOK, QUEEN, KING, KNIGHT, 
@@ -25,6 +27,8 @@ public abstract class Piece {
 	}
 
 	public abstract List<Point> getOptions(Board chessBoard);
+	
+	public abstract List<Move> getValidMoves(Board board, boolean checkKing);
 
 	public void movePiece(Point dest) {
 		this.position = dest;
@@ -48,34 +52,38 @@ public abstract class Piece {
 		
 	}
 	
+	public void addMovesInLine(Board board, List<Move> moves, int x_offset, int y_offset) {
+		Point p = new Point(this.position.x + x_offset, this.position.y + y_offset);
+		
+		while(board.isValidGrid(p)) {
+			Piece pc = board.getPiece(p.x, p.y);
+			if(pc == null) {
+				moves.add(new Move(this, p, pc));
+			} else if(pc.getColour() != this.colour) {
+				moves.add(new Move(this, p, pc));
+				break;
+			} else {
+				break;
+			}
+			p = new Point(p.x + x_offset, p.y + y_offset);
+		}
+	}
+	
 	public Colour getColour() {
 		return this.colour;
 	};
-	
-	public int getRow() {
-		return this.position.x;
-	}
-	
-	public int getColumn() {
-		return this.position.y;
-	}
-	
-	public void setRow(int row) {
-		this.position.x = row;
-	}
-	
-	public void setColumn(int col) {
-		this.position.y = col;
-	}
 	
 	public Point getPosition() {
 		return this.position;
 	}
 	
-	public void setPosition(int row, int col) {
-		this.position = new Point(row,col);
+	public void setPosition(Point p) {
+		this.position = new Point(p.x, p.y);
 	}
 	
-	abstract public String toString();
+	@Override
+	public abstract Piece clone();
+	
+	public abstract String toString();
 
 }

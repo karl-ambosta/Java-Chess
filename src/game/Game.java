@@ -1,7 +1,10 @@
 package game;
 
 import java.awt.Point;
+import java.util.List;
 import java.util.Scanner;
+
+import pieces.Piece.Colour;
 
 public class Game {
 	
@@ -9,6 +12,10 @@ public class Game {
 	
 	//private int currentPlayer;
 	private Board chessBoard;
+	private enum gameResult {WhiteWin, BlackWin, Draw};
+	private List<Move> gameMoves;
+	private Colour turnColour;
+	private Player[] players;
 	
 	
 	public Game() {
@@ -76,6 +83,12 @@ public class Game {
 		String output = s + p.y;
 		return output;	
 	}
+	
+	private void addMove(Move move) {
+		this.gameMoves.add(move);
+	}
+	
+	
 	
 	public void gameLoop(){
 		boolean continueGame = true;

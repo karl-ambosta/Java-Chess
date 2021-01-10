@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 import game.Board;
+import game.Move;
 
 public class King extends Piece {
 	
@@ -66,6 +67,18 @@ public class King extends Piece {
 		
 		return checkPoints(options);
 	}
+	
+	@Override
+	public List<Move> getValidMoves(Board board, boolean checkKing) {
+		List<Move> options = new ArrayList<Move>();
+		Point p = this.position;
+		
+		if(board == null) {
+			return options;
+		}
+		return options;
+		
+	}
 
 	@Override
 	public Type getType() {
@@ -79,5 +92,13 @@ public class King extends Piece {
 		}
 		return "\u265A";
 	}
+
+	@Override
+	public Piece clone() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
 	
 }
