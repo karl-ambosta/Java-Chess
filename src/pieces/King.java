@@ -76,6 +76,16 @@ public class King extends Piece {
 		if(board == null) {
 			return options;
 		}
+		
+		addMoveIfValid(board, options, new Point(p.x+1, p.y+1));
+		addMoveIfValid(board, options, new Point(p.x+1, p.y));
+		addMoveIfValid(board, options, new Point(p.x+1, p.y-1));
+		addMoveIfValid(board, options, new Point(p.x, p.y+1));
+		addMoveIfValid(board, options, new Point(p.x, p.y-1));
+		addMoveIfValid(board, options, new Point(p.x-1, p.y+1));
+		addMoveIfValid(board, options, new Point(p.x-1, p.y));
+		addMoveIfValid(board, options, new Point(p.x-1, p.y-1));
+		
 		return options;
 		
 	}

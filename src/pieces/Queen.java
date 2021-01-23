@@ -133,13 +133,13 @@ public class Queen extends Piece {
 		addMovesInLine(board, options, 0, -1);
 		addMovesInLine(board, options, 0, 1);
 		
-		//add moves in lines diagonals
+		// add moves in lines diagonals
 		addMovesInLine(board, options, -1, -1);
 		addMovesInLine(board, options, -1, 1);
 		addMovesInLine(board, options, 1, 1);
 		addMovesInLine(board, options, 1, -1);
 		
-		return null;
+		return options;
 	}
 
 	@Override

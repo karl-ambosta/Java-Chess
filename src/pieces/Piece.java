@@ -69,6 +69,15 @@ public abstract class Piece implements Serializable, Cloneable {
 		}
 	}
 	
+	public void addMoveIfValid(Board board, List<Move> options, Point p) {
+		if(board.isValidGrid(p)) {
+			Piece pc = board.getPiece(p.x, p.y);
+			if(pc == null || pc.getColour() != this.colour) {
+				options.add(new Move(this, p, pc));		
+			}
+		}
+	}
+	
 	public Colour getColour() {
 		return this.colour;
 	};

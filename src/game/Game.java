@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.util.List;
 import java.util.Scanner;
 
+import pieces.Piece;
 import pieces.Piece.Colour;
 
 public class Game {
@@ -15,7 +16,8 @@ public class Game {
 	private enum gameResult {WhiteWin, BlackWin, Draw};
 	private List<Move> gameMoves;
 	private Colour turnColour;
-	private Player[] players;
+	private Player player_white;
+	private Player player_black;
 	
 	
 	public Game() {
@@ -43,11 +45,15 @@ public class Game {
 	    return false;
 	}
 	
-	private void commands(String s) {
+	private boolean commands(Player player, String s) {
 		String[] input = s.split(" ");
 		
-		if(s.equals("Restart")) {
+		if(s.equals("restart")) {
+			System.out.println("Resetting board");
 			chessBoard.initialize();
+			System.out.print(chessBoard.toString() + "\n");
+			turnColour = Colour.BLACK;
+			return true;
 		} else if(s.equals("help")) {
 			showCommands();
 		} else if(s.matches("([A-H]{1})([0-7]{1})(\\s){1}(\\?)")) {
@@ -55,21 +61,39 @@ public class Game {
 			int y_coord = gridToPoint(input[0]).y;
 			
 			if(x_coord >= 0 || x_coord < 8 || y_coord >= 0 || y_coord < 8) {
-				chessBoard.showPossibleMoves(gridToPoint(input[0]).x, gridToPoint(input[0]).y);
+				if(chessBoard.getPiece(x_coord, y_coord).getColour() == player.getColour()) { 
+					chessBoard.showPossibleMoves(gridToPoint(input[0]).x, gridToPoint(input[0]).y);
+				} else {
+					System.out.println("Piece at " + pointToGrid(new Point(x_coord, y_coord)) + 
+							" is not a " + player.getColour() + " piece");
+				}
 			} else {
 				System.out.println("Invalid Tile!");
 			}
 			
 		} else if(isValidGrid(s)) {
-			chessBoard.move(gridToPoint(input[0]), gridToPoint(input[1]));
+			//chessBoard.move(gridToPoint(input[0]), gridToPoint(input[1]));
+			Point start = gridToPoint(input[0]);
+			Point dest = gridToPoint(input[1]);
+			Piece moving = chessBoard.getPiece(start.x, start.y);
+			Piece capture = chessBoard.getPiece(dest.x, dest.y);
+			
+			chessBoard.movePiece(new Move(moving, dest, capture));
 			System.out.print(chessBoard.toString() + "\n");
+			return true;
 		} else {
 			System.out.println("Invalid Command");
 		}
+		
+		return false;
 	}
 	
 	private void showCommands() {
 		System.out.println("Displaying list of commands");
+		System.out.println("'restart' -> reset the chess game");
+		System.out.println("'help' -> display these commands");
+		System.out.println("'[GridSquare] ?' -> Get all valid moves for the Piece at specified grid square");
+		System.out.println("'[GridSquare1] [GridSquare2]' -> Move Piece from Square 1 to Square 2");
 	}
 
 	private static Point gridToPoint(String s) {
@@ -80,7 +104,7 @@ public class Game {
 	
 	private static String pointToGrid(Point p) {
 		String s = Character.toString((char)(p.x + 65));
-		String output = s + p.y;
+		String output = s + (p.y+1);
 		return output;	
 	}
 	
@@ -88,25 +112,61 @@ public class Game {
 		this.gameMoves.add(move);
 	}
 	
+	private void changeTurn() {
+		if(turnColour == null || turnColour == Colour.BLACK) {
+			turnColour = Colour.WHITE;
+			System.out.println(player_white.getName() + "'s turn (WHITE)");
+		} else {
+			turnColour = Colour.BLACK;
+			System.out.println(player_black.getName() + "'s turn (BLACK)");
+		}
+	}
 	
+	private Player getActivePlayer() {
+		if(turnColour == Colour.WHITE) {
+			return player_white;
+		} else {
+			return player_black;
+		}
+	}
 	
 	public void gameLoop(){
 		boolean continueGame = true;
-		String input, start, dest = "";
+		String input = "";
+		
+		System.out.println("Enter Player 1 Name (White) (if computer player, leave blank): ");
+		input = userInput.nextLine();
+		
+		if(input.equals("")) {
+			player_white = new Player("Computer",Colour.WHITE, false);
+		} else {
+			player_white = new Player(input, Colour.WHITE, true);
+		}
+		
+		System.out.println("Enter Player 2 Name (Black) (if computer player, leave blank): ");
+		input = userInput.nextLine();
+		
+		if(input.equals("")) {
+			player_black = new Player("Computer", Colour.BLACK, false);
+		} else {
+			player_black = new Player(input, Colour.BLACK, true);
+		}
+		
+		
 		System.out.print(chessBoard.toString() + "\n");
+		changeTurn();
 		
 		while(continueGame){
-			
-			/*
-			if (isGameOver()){
-				break;
-			}
-			*/
 			
 			System.out.print("Enter command: " );
 			input = userInput.nextLine();
 			
-			commands(input);
+			boolean result = commands(getActivePlayer(), input);
+			
+			if(result) {
+				changeTurn();
+				//System.out.println("changing player turn");
+			}
 		}
 	}
 

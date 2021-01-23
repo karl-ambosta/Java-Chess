@@ -18,10 +18,9 @@ public class Board implements Serializable, Cloneable {
 	private Board previousState = null;
     private Colour turn;
     private List<Piece> pieces = new ArrayList<Piece>();
-    
+    private Ai ai;
     private Piece inCheck = null;
     private Piece lastMoved = null;
-    private Ai ai = null;
 	
 	public Board() {
 		this.setRows(8);
@@ -58,7 +57,7 @@ public class Board implements Serializable, Cloneable {
 		addPiece(new Bishop(new Point(7,5), Colour.WHITE));
 		
 		for(int i = 0; i < 8; i++) {
-			addPiece(new Pawn(new Point(6,i), Colour.WHITE));
+			addPiece(new Pawn(new Point(6,i), Colour.WHITE, false));
 		}
 		
 		// Add Black Pieces		
@@ -72,7 +71,7 @@ public class Board implements Serializable, Cloneable {
 		addPiece(new Bishop(new Point(0,5), Colour.BLACK));
 		
 		for(int i = 0; i < 8; i++) {
-			addPiece(new Pawn(new Point(1,i), Colour.BLACK));
+			addPiece(new Pawn(new Point(1,i), Colour.BLACK, false));
 		}
 		
 	}
@@ -88,6 +87,10 @@ public class Board implements Serializable, Cloneable {
 		Piece p = getPiece(start.x, start.y);
 		List<Point> pieceOptions = p.getOptions(this);
 		
+		if(p instanceof Pawn) {
+			Pawn pw = (Pawn) p;
+			pw.setMoved(true);
+		}
 		for(Point point : pieceOptions) {
 			if(!checkPoint(p.getColour(), point)) {
 				pieceOptions.remove(point);
@@ -122,12 +125,32 @@ public class Board implements Serializable, Cloneable {
 		return false;
 	}
 	
-	public void movePiece(Move m) {
+	public boolean movePiece(Move m) {
+		this.previousState = this.clone();
 		if(m.getCaptured() != null) {
 			this.removePiece(m.getPosition());
 		}
 		
+		if(m.getPiece() instanceof Pawn) {
+			Pawn p = (Pawn)m.getPiece();
+			p.setMoved(true);
+		}
+		
 		m.getPiece().setPosition(m.getPosition()); 
+		/*
+		if(pieceOptions.contains(dest)) {
+			p.movePiece(dest);
+			this.board[start.x][start.y] = null;
+			this.board[dest.x][dest.y] = p;
+			String s = Character.toString((char)(start.x+65)) + (start.y+1);
+			String d = Character.toString((char)(dest.x+65)) + (dest.y+1);
+			System.out.println("Moved " + p.getType() + ": " + s + " -> " + d);
+		} else {
+			System.out.println("Invalid Move for " + p.getType());
+		}
+		*/
+		
+		return true;
 	}
 	
 	public boolean ifMovePutsKingInCheck(Move m, Colour c) {
@@ -142,10 +165,8 @@ public class Board implements Serializable, Cloneable {
                         return true;
 			}
 		}
-
 		
-		return false;
-		
+		return false;	
 	}
 	
 	private Board checkMove(Move m) {
@@ -184,13 +205,14 @@ public class Board implements Serializable, Cloneable {
 			System.out.println("Tile is empty!");
 			return;
 		}
-		List<Point> options = p.getOptions(this);
+		List<Move> options = p.getValidMoves(this, false);
 		System.out.println("Showing moves for " + p.getType() + " : ");
 		if(options.isEmpty()) {
 			System.out.println("No Valid Moves for Pawn " + Character.toString((char)(row+65)) + (col+1));
 		}
-		for(Point pos : options) {
-			System.out.println("[" + Character.toString((char)(pos.x+65)) + (pos.y+1) + "]");
+		for(Move m : options) {
+			Point pt = m.getPosition();
+			System.out.println("[" + Character.toString((char)(pt.x+65)) + (pt.y+1) + "]");
 		}
 	}
 
@@ -237,6 +259,4 @@ public class Board implements Serializable, Cloneable {
 	public Board clone() {
 		return new Board(turn, previousState, pieces, lastMoved, inCheck, ai);
 	}
-
-
 }
