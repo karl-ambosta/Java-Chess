@@ -12,33 +12,7 @@ public class Knight extends Piece {
 		super(position, colour);
 		this.pieceType = Type.KNIGHT;
 	}
-
-	@Override
-	public List<Point> getOptions(Board chessBoard) {
-		List<Point> options = new ArrayList<Point>();
-		Point p = this.position;
-		
-
-		options.add(new Point(p.x-1, p.y-2));
-		options.add(new Point(p.x-2, p.y+1));
-		options.add(new Point(p.x+1, p.y+2));
-		
-		return checkPoints(options);
-	}
-
-	@Override
-	public Type getType() {
-		return this.pieceType;
-	}
-
-	@Override
-	public String toString() {
-		if(this.colour == Colour.WHITE) {
-			return "\u2658";
-		}
-		return "\u265E";
-	}
-
+	
 	@Override
 	public List<Move> getValidMoves(Board board, boolean checkKing) {
 		List<Move> options = new ArrayList<Move>();
@@ -59,6 +33,21 @@ public class Knight extends Piece {
 		
 		return options;
 	}
+
+	@Override
+	public Type getType() {
+		return this.pieceType;
+	}
+
+	@Override
+	public String toString() {
+		if(this.colour == Colour.WHITE) {
+			return "\u2658";
+		}
+		return "\u265E";
+	}
+
+	
 
 	@Override
 	public Piece clone() {

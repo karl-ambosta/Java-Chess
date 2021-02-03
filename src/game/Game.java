@@ -61,7 +61,8 @@ public class Game {
 			int y_coord = gridToPoint(input[0]).y;
 			
 			if(x_coord >= 0 || x_coord < 8 || y_coord >= 0 || y_coord < 8) {
-				if(chessBoard.getPiece(x_coord, y_coord).getColour() == player.getColour()) { 
+				Point p = new Point(x_coord, y_coord);
+				if(chessBoard.getPieceAt(p).getColour() == player.getColour()) { 
 					chessBoard.showPossibleMoves(gridToPoint(input[0]).x, gridToPoint(input[0]).y);
 				} else {
 					System.out.println("Piece at " + pointToGrid(new Point(x_coord, y_coord)) + 
@@ -72,13 +73,13 @@ public class Game {
 			}
 			
 		} else if(isValidGrid(s)) {
-			//chessBoard.move(gridToPoint(input[0]), gridToPoint(input[1]));
 			Point start = gridToPoint(input[0]);
 			Point dest = gridToPoint(input[1]);
-			Piece moving = chessBoard.getPiece(start.x, start.y);
-			Piece capture = chessBoard.getPiece(dest.x, dest.y);
+			Piece moving = chessBoard.getPieceAt(start);
+			Piece capture = chessBoard.getPieceAt(dest);
 			
-			chessBoard.movePiece(new Move(moving, dest, capture));
+			Move m = new Move(moving, dest, capture);
+			chessBoard.movePiece(m);
 			System.out.print(chessBoard.toString() + "\n");
 			return true;
 		} else {
@@ -153,6 +154,8 @@ public class Game {
 		}
 		
 		
+		
+		
 		System.out.print(chessBoard.toString() + "\n");
 		changeTurn();
 		
@@ -160,13 +163,24 @@ public class Game {
 			
 			System.out.print("Enter command: " );
 			input = userInput.nextLine();
+			/*
+			Point pp = gridToPoint(input);
+			System.out.println("Point = " + pp);
+			Piece piece = chessBoard.getPieceAt(pp);
+			List<Piece> ppp = chessBoard.getPieces(Colour.BLACK);
 			
+			System.out.println("Piece: " + piece);
+
+			
+			System.out.println(ppp);
+			*/
 			boolean result = commands(getActivePlayer(), input);
 			
 			if(result) {
 				changeTurn();
 				//System.out.println("changing player turn");
 			}
+			
 		}
 	}
 

@@ -11,31 +11,35 @@ import pieces.Piece.Colour;
 import pieces.Piece.Type;
 
 public class Board implements Serializable, Cloneable {
-	
-	private Piece[][] board;
+
 	private int rows;
 	private int cols;
 	private Board previousState = null;
     private Colour turn;
-    private List<Piece> pieces = new ArrayList<Piece>();
-    private Ai ai;
-    private Piece inCheck = null;
-    private Piece lastMoved = null;
+    private List<Piece> pieces;
+    //private Ai ai;
+    private Piece inCheck;
+    private Piece lastMoved;
 	
 	public Board() {
 		this.setRows(8);
 		this.setCols(8);
+		this.previousState = null;
+		this.turn = Colour.WHITE;
+		this.pieces = new ArrayList<Piece>();
+		this.inCheck = null;
+		this.lastMoved = null;
 	}
 	
 	private Board(Colour turn, Board previousState, List<Piece> pieces,
-            Piece lastMoved, Piece inCheck, Ai ai) {
+            Piece lastMoved, Piece inCheck) {
         this.turn = turn;
         if (inCheck != null) {
             this.inCheck = inCheck.clone();
         }
         if (lastMoved != null)
             this.lastMoved = lastMoved.clone();
-        this.ai = ai;
+        //this.ai = ai;
         this.previousState = previousState;
         for(Piece p : pieces) {
             this.pieces.add(p.clone());
@@ -43,11 +47,8 @@ public class Board implements Serializable, Cloneable {
     }
 	
 	public void initialize() {
-		board = new Piece[8][8];
-		
 		// Add White Pieces
-		
-		addPiece(new King(new Point(7,4), Colour.WHITE));
+		addPiece(new King(new Point(7,4), Colour.WHITE, false));
 		addPiece(new Queen(new Point(7,3), Colour.WHITE));
 		addPiece(new Rook(new Point(7,0), Colour.WHITE));
 		addPiece(new Rook(new Point(7,7), Colour.WHITE));
@@ -61,7 +62,7 @@ public class Board implements Serializable, Cloneable {
 		}
 		
 		// Add Black Pieces		
-		addPiece(new King(new Point(0,4), Colour.BLACK));
+		addPiece(new King(new Point(0,4), Colour.BLACK, false));
 		addPiece(new Queen(new Point(0,3), Colour.BLACK));
 		addPiece(new Rook(new Point(0,0), Colour.BLACK));
 		addPiece(new Rook(new Point(0,7), Colour.BLACK));
@@ -76,48 +77,6 @@ public class Board implements Serializable, Cloneable {
 		
 	}
 	
-	public Piece getPiece(int x, int y) {
-		if(x < 0 || x > 7 || y < 0 || y > 7) {
-			return null;
-		}
-		return this.board[x][y];
-	}
-	
-	public void move(Point start, Point dest) {
-		Piece p = getPiece(start.x, start.y);
-		List<Point> pieceOptions = p.getOptions(this);
-		
-		if(p instanceof Pawn) {
-			Pawn pw = (Pawn) p;
-			pw.setMoved(true);
-		}
-		for(Point point : pieceOptions) {
-			if(!checkPoint(p.getColour(), point)) {
-				pieceOptions.remove(point);
-			}
-		}
-		
-		if(pieceOptions.contains(dest)) {
-			p.movePiece(dest);
-			this.board[start.x][start.y] = null;
-			this.board[dest.x][dest.y] = p;
-			String s = Character.toString((char)(start.x+65)) + (start.y+1);
-			String d = Character.toString((char)(dest.x+65)) + (dest.y+1);
-			System.out.println("Moved " + p.getType() + ": " + s + " -> " + d);
-		} else {
-			System.out.println("Invalid Move for " + p.getType());
-		}
-	}
-	
-	public boolean checkPoint(Colour c, Point p) {
-		if(this.getPiece(p.x, p.y) != null &&
-				this.getPiece(p.x, p.y).colour == c) {
-			return false;
-		}
-		
-		return true;
-	}
-	
 	public boolean isValidGrid(Point p) {
 		if(p.x >= 0 && p.x < 8 && p.y >= 0 && p.y < 8) {
 			return true;
@@ -125,10 +84,28 @@ public class Board implements Serializable, Cloneable {
 		return false;
 	}
 	
-	public boolean movePiece(Move m) {
+	public void showPossibleMoves(int row, int col) {
+		Point pt = new Point(row, col);
+		Piece p = this.getPieceAt(pt);
+		if(p == null) {
+			System.out.println("Tile is empty!");
+			return;
+		}
+		List<Move> options = p.getValidMoves(this, false);
+		System.out.println("Showing moves for " + p.getType() + " : ");
+		if(options.isEmpty()) {
+			System.out.println("No Valid Moves for " + p.getType() + " " + Character.toString((char)(row+65)) + (col+1));
+		}
+		for(Move m : options) {
+			Point pt2 = m.getPosition();
+			System.out.println("[" + Character.toString((char)(pt2.x+65)) + (pt2.y+1) + "]");
+		}
+	}
+	
+	public void movePiece(Move m) {
 		this.previousState = this.clone();
 		if(m.getCaptured() != null) {
-			this.removePiece(m.getPosition());
+			this.removePiece(m.getCaptured());
 		}
 		
 		if(m.getPiece() instanceof Pawn) {
@@ -136,21 +113,13 @@ public class Board implements Serializable, Cloneable {
 			p.setMoved(true);
 		}
 		
-		m.getPiece().setPosition(m.getPosition()); 
-		/*
-		if(pieceOptions.contains(dest)) {
-			p.movePiece(dest);
-			this.board[start.x][start.y] = null;
-			this.board[dest.x][dest.y] = p;
-			String s = Character.toString((char)(start.x+65)) + (start.y+1);
-			String d = Character.toString((char)(dest.x+65)) + (dest.y+1);
-			System.out.println("Moved " + p.getType() + ": " + s + " -> " + d);
-		} else {
-			System.out.println("Invalid Move for " + p.getType());
+		if(m.getPiece() instanceof King) {
+			King k = (King)m.getPiece();
+			k.setMoved(true);
 		}
-		*/
 		
-		return true;
+		m.getPiece().setPosition(m.getPosition()); 
+		m.getPiece().movePiece(m.getPosition());
 	}
 	
 	public boolean ifMovePutsKingInCheck(Move m, Colour c) {
@@ -174,10 +143,10 @@ public class Board implements Serializable, Cloneable {
 		
 		if(m.getCaptured() != null) {
 			Point pc = m.getCaptured().getPosition();
-			Piece capture = boardCopy.getPiece(pc.x, pc.y);
+			Piece capture = boardCopy.getPieceAt(pc);
 
 			Point pm = m.getCaptured().getPosition();
-            Piece moving = boardCopy.getPiece(pm.x, pm.y);
+            Piece moving = boardCopy.getPieceAt(pm);
 
             // performs the move on the copied board
             boardCopy.movePiece(new Move(moving, m.getPosition(), capture));
@@ -189,31 +158,21 @@ public class Board implements Serializable, Cloneable {
 		return pieces.stream().filter(p -> p.getColour() == c).collect(Collectors.toList());
 	}
 	
+	public Piece getPieceAt(Point pt) {
+		List<Piece> pieceList = pieces.stream().filter(p -> p.getPosition().equals(pt)).collect(Collectors.toList());
+		if(pieceList.size() > 0) {
+			return pieceList.get(0);
+		}
+		
+		return null;
+	}
+	
 	public void addPiece(Piece p) {
-		Point pos = p.getPosition();
-		this.board[pos.x][pos.y] = p;
+		pieces.add(p);
 	}
 	
-	public void removePiece(Point p) {
-		this.board[p.x][p.y] = null;
-		// pieces.remove(p);
-	}
-	
-	public void showPossibleMoves(int row, int col) {
-		Piece p = this.getPiece(row, col);
-		if(p == null) {
-			System.out.println("Tile is empty!");
-			return;
-		}
-		List<Move> options = p.getValidMoves(this, false);
-		System.out.println("Showing moves for " + p.getType() + " : ");
-		if(options.isEmpty()) {
-			System.out.println("No Valid Moves for Pawn " + Character.toString((char)(row+65)) + (col+1));
-		}
-		for(Move m : options) {
-			Point pt = m.getPosition();
-			System.out.println("[" + Character.toString((char)(pt.x+65)) + (pt.y+1) + "]");
-		}
+	public void removePiece(Piece p) {
+		pieces.remove(p);
 	}
 
 	public int getRows() {
@@ -241,9 +200,10 @@ public class Board implements Serializable, Cloneable {
 	        chess += "(" + Character.toString((char)(row+65)) +")\t";
 
 	        for (int column = 0; column < 8; column++) {
+	        	Point p = new Point(row,column);
 	        	
-	        	if(getPiece(row,column) != null) {
-	        		chess += "| " + getPiece(row,column).toString() + " ";
+	        	if(getPieceAt(p) != null) {
+	        		chess += "| " + getPieceAt(p).toString() + " ";
 	        	} else {
 	        		chess += "| " + " " + " ";
 	        	}
@@ -257,6 +217,6 @@ public class Board implements Serializable, Cloneable {
 	
 	@Override
 	public Board clone() {
-		return new Board(turn, previousState, pieces, lastMoved, inCheck, ai);
+		return new Board(turn, previousState, pieces, lastMoved, inCheck);
 	}
 }

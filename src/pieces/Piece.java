@@ -2,8 +2,6 @@ package pieces;
 
 import java.awt.Point;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import game.Board;
@@ -26,8 +24,6 @@ public abstract class Piece implements Serializable, Cloneable {
 		this.colour = colour;
 	}
 
-	public abstract List<Point> getOptions(Board chessBoard);
-	
 	public abstract List<Move> getValidMoves(Board board, boolean checkKing);
 
 	public void movePiece(Point dest) {
@@ -35,28 +31,12 @@ public abstract class Piece implements Serializable, Cloneable {
 	}
 	
 	public abstract Type getType();
-	
-	public List<Point> checkPoints(List<Point> options) {
-		List<Point> toRemove = new ArrayList<Point>();
-		
-		for(Point p : options) {
-			if(p.x < 0 || p.x > 7 || p.y < 0 || p.y > 7) {
-				toRemove.add(p);
-			}
-		}
-		
-		options.removeAll(toRemove);
-		
-		options.sort(Comparator.comparing(Point::getX));
-		return options;
-		
-	}
-	
+
 	public void addMovesInLine(Board board, List<Move> moves, int x_offset, int y_offset) {
 		Point p = new Point(this.position.x + x_offset, this.position.y + y_offset);
 		
 		while(board.isValidGrid(p)) {
-			Piece pc = board.getPiece(p.x, p.y);
+			Piece pc = board.getPieceAt(p);
 			if(pc == null) {
 				moves.add(new Move(this, p, pc));
 			} else if(pc.getColour() != this.colour) {
@@ -71,7 +51,7 @@ public abstract class Piece implements Serializable, Cloneable {
 	
 	public void addMoveIfValid(Board board, List<Move> options, Point p) {
 		if(board.isValidGrid(p)) {
-			Piece pc = board.getPiece(p.x, p.y);
+			Piece pc = board.getPieceAt(p);
 			if(pc == null || pc.getColour() != this.colour) {
 				options.add(new Move(this, p, pc));		
 			}
@@ -87,10 +67,9 @@ public abstract class Piece implements Serializable, Cloneable {
 	}
 	
 	public void setPosition(Point p) {
-		this.position = new Point(p.x, p.y);
+		this.position = p;
 	}
-	
-	@Override
+
 	public abstract Piece clone();
 	
 	public abstract String toString();
